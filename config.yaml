@@ -7,9 +7,9 @@ disqusShortname: ''
 params:
   banner:
     buttonText: Get Started
-    subtitle: |-
-      A RESPONSIVE SITE TEMPLATE DESIGNED BY HTML5 UP
-      AND RELEASED UNDER THE CREATIVE COMMONS.
+    #subtitle: |-
+      #A RESPONSIVE SITE TEMPLATE DESIGNED BY HTML5 UP
+      #AND RELEASED UNDER THE CREATIVE COMMONS.
     title: I am Thaisiri Siripoorikan and this is my website!
   blog: {}
   contact:
@@ -35,16 +35,16 @@ params:
     text: Please visit [this page](/)
   favicon: favicon.ico
   footer:
-    copyright: LBS
+    #copyright: LBS
     enable: yes
-    quicklinks:
-      - alt: HTML5 UP
-        text: 'Design: '
+    #quicklinks:
+      #- alt: HTML5 UP
+        #text: 'Design: '
         #rl: https://www.html5up.net
     social:
-      - icon: fa-twitter
-        label: Twitter
-        url: https://www.twitter.com
+      #- icon: fa-twitter
+        #label: Twitter
+        #url: https://www.twitter.com
       - icon: fa-facebook
         label: Facebook
         url: https://www.facebook.com/thaisiri.siripoorikan/
@@ -54,9 +54,9 @@ params:
       - icon: fa-github
         label: GitHub
         url: https://github.com/thaisiri/
-      - icon: fa-linkedin
-        label: LinkedIn
-        url: https://www.linkedin.com
+      #- icon: fa-linkedin
+        #label: LinkedIn
+        #url: https://www.linkedin.com
   image: ''
   name: Your name
   navigation:
