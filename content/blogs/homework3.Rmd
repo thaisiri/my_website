@@ -1,0 +1,275 @@
+---
+categories:  
+- ""    #the front matter should be like the one found in, e.g., blog2.md. It cannot be like the normal Rmd we used
+- ""
+date: "2021-09-30"
+description: Money in UK politics # the title that will show up once someone gets to this page
+draft: false
+image: uk.jpg # save picture in \static\img\blogs. Acceptable formats= jpg, jpeg, or png . Your iPhone pics wont work
+
+keywords: ""
+slug: homework3 # slug is the shorthand URL address... no spaces plz
+title: Money in UK politics
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#| label: load-libraries
+#| echo: false # This option disables the printing of code (only output is displayed).
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(wbstats)
+library(tictoc)
+library(skimr)
+library(countrycode)
+library(here)
+library(DBI)
+library(dbplyr)
+library(arrow)
+library(rvest)
+library(robotstxt) # check if we're allowed to scrape the data
+library(scales)
+library(sf)
+library(readxl)
+```
+
+[The Westminster Accounts](https://news.sky.com/story/the-westminster-accounts-12786091), a recent collaboration between Sky News and Tortoise Media, examines the flow of money through UK politics. It does so by combining data from three key sources:
+
+1.  [Register of Members' Financial Interests](https://www.parliament.uk/mps-lords-and-offices/standards-and-financial-interests/parliamentary-commissioner-for-standards/registers-of-interests/register-of-members-financial-interests/),
+2.  [Electoral Commission records of donations to parties](http://search.electoralcommission.org.uk/English/Search/Donations), and
+3.  [Register of All-Party Parliamentary Groups](https://www.parliament.uk/mps-lords-and-offices/standards-and-financial-interests/parliamentary-commissioner-for-standards/registers-of-interests/register-of-all-party-party-parliamentary-groups/).
+
+You can [search and explore the results](https://news.sky.com/story/westminster-accounts-search-for-your-mp-or-enter-your-full-postcode-12771627) through the collaboration's interactive database. Simon Willison [has extracted a database](https://til.simonwillison.net/shot-scraper/scraping-flourish) and this is what we will be working with. If you want to read more about [the project's methodology](https://www.tortoisemedia.com/2023/01/08/the-westminster-accounts-methodology/).
+
+## Open a connection to the database
+
+The database made available by Simon Willison is an `SQLite` database
+
+```{r}
+sky_westminster <- DBI::dbConnect(
+  drv = RSQLite::SQLite(),
+  dbname = here::here("data", "sky-westminster-files.db")
+)
+```
+
+How many tables does the database have?
+
+```{r}
+library(tidyverse)
+library(wbstats)
+library(tictoc)
+library(skimr)
+library(countrycode)
+library(here)
+library(DBI)
+library(dbplyr)
+library(arrow)
+library(rvest)
+library(robotstxt) # check if we're allowed to scrape the data
+library(scales)
+library(sf)
+library(readxl)
+
+sky_westminster <- DBI::dbConnect(
+  drv = RSQLite::SQLite(),
+  dbname = here::here("data", "sky-westminster-files.db")
+)
+
+DBI::dbListTables(sky_westminster)
+
+#There are 7 tables in the database.
+```
+
+## Which MP has received the most amount of money?
+
+You need to work with the `payments` and `members` tables and for now we just want the total among all years. To insert a new, blank chunk of code where you can write your beautiful code (and comments!), please use the following shortcut: `Ctrl + Alt + I` (Windows) or `cmd + option + I` (mac)
+
+```{r}
+payments_db <- dplyr::tbl(sky_westminster,"payments")
+members_db <- dplyr::tbl(sky_westminster,"members")
+
+glimpse(members_db)
+glimpse(payments_db)
+
+members_df <- members_db %>% 
+  select(name, id) %>% 
+  collect()
+
+payments_df <- payments_db %>% 
+  select(member_id, value) %>%
+  collect()
+
+members_payments_df <- members_df %>% 
+  left_join(payments_df, by = c("id" = "member_id")) %>% 
+  filter(!is.na(name)) %>%
+  group_by(name) %>% 
+  summarise(total_payment = sum(value)) %>% 
+  arrange(desc(total_payment))
+
+#print result
+members_payments_df
+
+# Theresa May has received the most amount of money.
+```
+
+## Any `entity` that accounts for more than 5% of all donations?
+
+Is there any `entity` whose donations account for more than 5% of the total payments given to MPs over the 2020-2022 interval? Who are they and who did they give money to?
+
+```{r}
+payments_db <- dplyr::tbl(sky_westminster,"payments")
+members_db <- dplyr::tbl(sky_westminster,"members")
+
+glimpse(members_db)
+glimpse(payments_db)
+
+members_df <- members_db %>% 
+  select(name, id) %>% 
+  collect()
+
+payments_df <- payments_db %>% 
+  select(member_id, entity, value) %>%
+  collect()
+
+members_payments_df <- members_df %>% 
+  left_join(payments_df, by = c("id" = "member_id")) %>% 
+  filter(!is.na(entity)) %>%
+  group_by(entity) %>% 
+  summarise(total_payment = sum(value)) %>% 
+  filter((total_payment / sum(total_payment))*100 > 5)
+
+members_df %>% 
+  left_join(payments_df, by = c("id" = "member_id")) %>% 
+  select(entity, name) %>% 
+  filter(entity == "Withers LLP")
+
+#print result
+members_payments_df
+
+# Withers LLP accounts for more than 5% of all donations, giving to "Sir Geoffrey Cox"
+```
+
+## Do `entity` donors give to a single party or not?
+
+-   How many distinct entities who paid money to MPS are there?
+-   How many (as a number and %) donated to MPs belonging to a single party only?
+
+```{r}
+payments_db <- dplyr::tbl(sky_westminster,"payments")
+members_db <- dplyr::tbl(sky_westminster,"members")
+
+glimpse(members_db)
+glimpse(payments_db)
+
+members_df <- members_db %>% 
+  select(name, id) %>% 
+  collect()
+
+payments_df <- payments_db %>% 
+  select(member_id, entity, value) %>%
+  collect()
+
+distinct_entities <- payments_df %>% 
+  distinct(entity) %>%
+  nrow()
+
+distinct_entities
+
+#There are 2213 distinct entities who paid money to MPS.
+
+members_payments_df <- members_df %>% 
+  left_join(payments_df, by = c("id" = "member_id")) %>% 
+  group_by(entity) %>% 
+  filter(!is.na(entity)) %>%
+  summarise(count = n()) %>% 
+  filter(count == 1) %>% 
+  nrow()
+
+#calculate percentage
+percentage <- members_payments_df/distinct_entities*100
+
+#print results
+members_payments_df
+percentage
+
+#There are 1361 donation, or 61.50023% of total donation, to MPs belonging to a single party only.
+```
+
+## Which party has raised the greatest amount of money in each of the years 2020-2022?
+
+I would like you to write code that generates the following table.
+
+```{r echo=FALSE, out.width="80%"}
+payments_db <- dplyr::tbl(sky_westminster,"payments")
+members_db <- dplyr::tbl(sky_westminster,"members")
+parties_db <- dplyr::tbl(sky_westminster,"parties")
+
+glimpse(members_db)
+glimpse(payments_db)
+glimpse(parties_db)
+
+members_df <- members_db %>% 
+  select(name, id, party_id) %>% 
+  collect()
+
+payments_df <- payments_db %>% 
+  select(member_id, entity, value) %>%
+  mutate(id = member_id) %>% 
+  select(id, entity, value) %>% 
+  collect()
+
+parties_df <- parties_db %>% 
+  select(name, id) %>%
+  mutate(party_id = id) %>%
+  mutate(party_name = name) %>%
+  select(party_name,party_id) %>% 
+  collect()
+
+parties_members_df <- parties_df %>% 
+  left_join(members_df, by = "party_id") %>% 
+  select(party_name, party_id, id)
+
+total_donations_table <- parties_members_df %>% 
+  left_join(payments_df, by = "id") %>%
+  filter(!is.na(value)) %>%
+  group_by(party_name) %>% 
+  summarise(total_payment = sum(value)) %>% 
+  arrange(desc(total_payment))
+
+#print result
+total_donations_table
+
+knitr::include_graphics(here::here("images", "total_donations_table.png"), error = FALSE)
+```
+
+... and then, based on this data, plot the following graph.
+
+```{r echo=FALSE, out.width="80%"}
+
+total_donations_graph <- total_donations_table %>%
+  mutate(party_name = case_when(
+    party_name %in% c("Conservative", "Labour", "Liberal Democrats", "Independent", "Scottish National Party") ~ party_name,
+    TRUE ~ "Other"
+  )) %>% 
+  mutate(party_name = fct_reorder(party_name, total_payment, .desc = TRUE)) %>% 
+  ggplot(aes(x = party_name, y = total_payment)) + 
+  geom_col() 
+
+#print result
+total_donations_graph
+
+knitr::include_graphics(here::here("images", "total_donations_graph.png"), error = FALSE)
+```
+
+This uses the default ggplot colour pallete, as I dont want you to worry about using the [official colours for each party](https://en.wikipedia.org/wiki/Wikipedia:Index_of_United_Kingdom_political_parties_meta_attributes). However, I would like you to ensure the parties are sorted according to total donations and not alphabetically. You may even want to remove some of the smaller parties that hardly register on the graph. Would facetting help you?
+
+Finally, when you are done working with the database, make sure you close the connection, or disconnect from the database.
+
+```{r}
+dbDisconnect(sky_westminster)
+```

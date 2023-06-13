@@ -71,13 +71,13 @@ params:
         url: '#'
       - name: Blogs
         url: blogs
-      - name: Generic Blog
-        url: blogs/ipsum
-      - name: Elements
-        surl: elements.html
+      #- name: Generic Blog
+        #url: blogs/ipsum
+      #- name: Elements
+        #surl: elements.html
     menu: Menu
-    subtitle: By HTML5 Up
-    title: Forty
+    #subtitle: By HTML5 Up
+    title: My website
   tiles:
     enable: yes
     showcase:
@@ -85,34 +85,29 @@ params:
         #subtitle: Ipsum Dolor Sit Amet
         title: Risk-Return of DJIA stocks
         url: blogs/risk_return
-      - image: pic02.jpg
-        subtitle: my info
+      - image: profile.jpg
+        subtitle: My info
         title: My info
         url: blogs/tempus
-      - image: pic03.jpg
-        subtitle: Lorem Etiam Nullam
-        title: Magna
-        url: blogs/magna
-      - image: pic04.jpg
-        subtitle: Nisl Sed Aliquam
-        title: Ipsum
-        url: blogs/ipsum
-      - image: pic05.jpg
-        subtitle: Ipsum Dolor Sit Amet
-        title: Consequat
-        url: blogs/ipsum
-      - image: pic06.jpg
-        subtitle: Feugiat Amet Tempus
-        title: Etiam
-        url: blogs/ipsum
+      - image: uk.jpg
+        #subtitle: Lorem Etiam Nullam
+        title: Money in UK politics
+        url: blogs/homework3
+      #- image: pic04.jpg
+       # subtitle: Nisl Sed Aliquam
+        #title: Ipsum
+        #url: blogs/ipsum
+      #- image: pic05.jpg
+       # subtitle: Ipsum Dolor Sit Amet
+        #title: Consequat
+        #url: blogs/ipsum
+      #- image: pic06.jpg
+       # subtitle: Feugiat Amet Tempus
+        #title: Etiam
+        #url: blogs/ipsum
   two:
     buttonText: Get Started
     enable: yes
-    subtitle: "Nullam et orci eu lorem consequat tincidunt vivamus et sagittis libero.
-      \n    Mauris aliquet magna magna sed nunc rhoncus pharetra. \n    Pellentesque
-      condimentum sem. In efficitur ligula tate urna. Maecenas laoreet massa vel lacinia
-      pellentesque lorem ipsum dolor. \n    Nullam et orci eu lorem consequat tincidunt.
-      Vivamus et sagittis libero.\n    Mauris aliquet magna magna sed nunc rhoncus
-      amet pharetra et feugiat tempus."
-    title: Massa libero
+    subtitle: "Hi, My name is Thaisiri Siripoorikan. Currently, I am studying an MBA program at LBS(London Business School). Prior to the MBA, I have been working at PTT, which is one of the largest energy company in Thailand!"
+    title: Get to know me!
     url: blogs
