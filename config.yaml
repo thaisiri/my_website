@@ -82,12 +82,12 @@ params:
     enable: yes
     showcase:
       - image: lbs.jpg
-        subtitle: Ipsum Dolor Sit Amet
-        title: Aliquam
+        #subtitle: Ipsum Dolor Sit Amet
+        title: Risk-Return of DJIA stocks
         url: blogs/risk_return
       - image: pic02.jpg
-        subtitle: Feugiat Amet Tempus
-        title: Tempus
+        subtitle: my info
+        title: My info
         url: blogs/tempus
       - image: pic03.jpg
         subtitle: Lorem Etiam Nullam
